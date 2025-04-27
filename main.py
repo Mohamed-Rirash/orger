@@ -3,7 +3,7 @@ from pathlib import Path
 
 import typer
 
-from utils import scanner
+from utils import move_files_by_type, scanner
 
 app = typer.Typer()
 DEFAULT_DOWNLOADS = Path.home() / "Downloads"
@@ -26,13 +26,18 @@ def auto(
     """
     Organize (i.e. classify) files in the given folder.
     """
-    src = Path.home() / src
+    try:
+        src = Path.home() / src
 
-    scanner(src)
-    confirm = typer.confirm("Do you want to move these files?")
-    if not confirm:
-        typer.echo("Operation cancelled.")
-        raise typer.Exit()
+        file = scanner(src)
+        confirm = typer.confirm("Do you want to move these files?")
+        if not confirm:
+            typer.echo("Operation cancelled.")
+            raise typer.Exit()
+        move_files_by_type(file)
+        typer.secho("✅ Done!", fg=typer.colors.GREEN)
+    except Exception as e:
+        typer.Abort(e)
 
 
 if __name__ == "__main__":

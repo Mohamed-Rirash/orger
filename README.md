@@ -129,6 +129,14 @@ orgi auto --config /path/to/.orgirc
 
 ---
 
+## Uninstallation
+
+To completely remove Orgi:
+
+```bash
+curl -sSL https://raw.githubusercontent.com/Mohamed-Rirash/orgi/main/uninstall.sh | bash
+```
+
 ## 🎬 Examples
 
 Organize today’s downloads in a demo folder:

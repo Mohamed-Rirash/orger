@@ -3,7 +3,7 @@ from pathlib import Path
 
 import typer
 
-from utils import move_files_by_type, scanner
+from .utils import move_files_by_type, scanner
 
 app = typer.Typer()
 DEFAULT_DOWNLOADS = Path.home() / "Downloads"

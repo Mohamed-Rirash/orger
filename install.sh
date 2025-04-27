@@ -27,7 +27,7 @@ elif [ -f "$HOME/.bashrc" ]; then
 else
     echo -e "${RED}Could not detect shell configuration file.${NC}"
     exit 1
-}
+fi
 
 # Create a temporary directory
 TEMP_DIR=$(mktemp -d)
@@ -47,7 +47,7 @@ mkdir -p "$INSTALL_DIR"
 
 # Create a wrapper script
 WRAPPER_SCRIPT="$INSTALL_DIR/orgi"
-cat << 'EOF' > "$WRAPPER_SCRIPT"
+cat > "$WRAPPER_SCRIPT" << 'EOF'
 #!/bin/bash
 source "$HOME/.orgi_env/bin/activate"
 command orgi "$@"

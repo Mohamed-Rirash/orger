@@ -1,6 +1,6 @@
 # orger
 A simple Python CLI tool to automatically organize files in your Downloads (or any specified) folder into dated subdirectories and type-based categories (images, documents, videos, others). Keeps your folder tidy by moving today’s files into a YYYY-MM-DD/ directory with categorized subfolders.
-![[demo.png]]
+![demo](./demo.png)
 
 
 ## Features

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # -----------------------------------------------------------------------------
-# install.sh — Install the Orgi CLI
+# install.sh — Install the Orgi CLI (version v0.1.1)
 # -----------------------------------------------------------------------------
 set -euo pipefail
 IFS=$'\n\t'
@@ -42,8 +42,7 @@ RC=""
 case "${SHELL##*/}" in
   zsh)   RC="$HOME/.zshrc" ;;
   bash)  RC="$HOME/.bashrc" ;;
-  *)     # fallback: prefer .bashrc if it exists
-         if [[ -f "$HOME/.bashrc" ]]; then
+  *)     if [[ -f "$HOME/.bashrc" ]]; then
            RC="$HOME/.bashrc"
          elif [[ -f "$HOME/.zshrc" ]]; then
            RC="$HOME/.zshrc"
@@ -68,10 +67,10 @@ fi
 source "$VENV_DIR/bin/activate"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 4) Install (or upgrade) the Orgi package
+# 4) Install (or upgrade) the Orgi package pinned to v0.1.1
 # ──────────────────────────────────────────────────────────────────────────────
-info "Installing Orgi CLI from GitHub..."
-pip install --upgrade "git+https://github.com/Mohamed-Rirash/orgi.git"
+info "Installing Orgi CLI (v0.1.1) from GitHub..."
+pip install --upgrade "git+https://github.com/Mohamed-Rirash/orgi.git@v0.1.1"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 5) Symlink wrapper into ~/.local/bin
@@ -107,7 +106,7 @@ fi
 # 7) Done!
 # ──────────────────────────────────────────────────────────────────────────────
 echo
-info "Orgi CLI has been installed successfully!"
+info "Orgi CLI v0.1.1 has been installed successfully!"
 cat <<EOF
 
 To start using it, either:

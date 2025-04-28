@@ -64,7 +64,7 @@ python3 -m pip install .
 Run the organizer on your default Downloads folder:
 
 ```bash
-orgi auto
+orgi 
 ```
 
 Specify a custom source directory:
@@ -73,12 +73,14 @@ Specify a custom source directory:
 orgi auto --src /path/to/folder
 ```
 
+![demo](./demo.png)
 View all available commands and options:
 
 ```bash
 orgi --help
 ```
 
+![demo](./demo2.png)
 ---
 
 ## Configuration

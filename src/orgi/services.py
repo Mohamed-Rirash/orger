@@ -120,14 +120,6 @@ def scanner(src: Path) -> List[Path]:
     return all_files
 
 
-# get current date as a name then
-dir_name = str(datetime.datetime.today().date())
-# create a folder named that name in Home/images | Home/vedios | home/documents | home/music dirs
-# move each types its dedicated dir
-# (make sure IMAGE_EXTS, VIDEO_EXTS, DOCUMENT_EXTS, MUSIC_EXTS are already defined,
-# and that you’ve got `import datetime` and `from pathlib import Path` at the top)
-
-
 def move_files_by_type(files: List[Path]) -> None:
     """
     Move each Path in `files` into ~/images/<date>/, ~/videos/<date>/, etc.,

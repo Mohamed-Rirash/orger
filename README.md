@@ -1,7 +1,7 @@
 # Orgi – File Organizer CLI
 
 A sleek and intuitive command‑line utility to automatically sort and organize files in your Downloads (or any specified) folder into date‑based directories and type‑based categories. Keep your workspace tidy with minimal effort.
-
+![demo](./demo.png)
 [![PyPI Version](https://img.shields.io/pypi/v/orgi.svg)](https://pypi.org/project/orgi/) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://chatgpt.com/c/LICENSE) [![Build Status](https://github.com/Mohamed-Rirash/orgi/actions/workflows/ci.yml/badge.svg)](https://github.com/Mohamed-Rirash/orgi/actions)
 
 ---

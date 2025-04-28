@@ -1,72 +1,120 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# install.sh — Install the Orgi CLI
+# -----------------------------------------------------------------------------
+set -euo pipefail
+IFS=$'\n\t'
 
-set -e
-
-# Colors for output
+# ──────────────────────────────────────────────────────────────────────────────
+# Colors
+# ──────────────────────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Check if Python and pip are installed
-command -v python3 >/dev/null 2>&1 || {
-    echo -e "${RED}Error: Python3 is required but not installed.${NC}"
+# ──────────────────────────────────────────────────────────────────────────────
+# Helpers
+# ──────────────────────────────────────────────────────────────────────────────
+error() {
+    echo -e "${RED}✗ $*${NC}" >&2
     exit 1
 }
 
-command -v pip3 >/dev/null 2>&1 || {
-    echo -e "${RED}Error: pip3 is required but not installed.${NC}"
-    exit 1
+info() {
+    echo -e "${GREEN}✔ $*${NC}"
 }
 
-# Detect shell configuration file
-if [ -f "$HOME/.zshrc" ]; then
-    SHELL_RC="$HOME/.zshrc"
-elif [ -f "$HOME/.bashrc" ]; then
-    SHELL_RC="$HOME/.bashrc"
-else
-    echo -e "${RED}Could not detect shell configuration file.${NC}"
-    exit 1
-fi
+warn() {
+    echo -e "${YELLOW}! $*${NC}"
+}
 
-# Create a temporary directory
-TEMP_DIR=$(mktemp -d)
-cd "$TEMP_DIR"
+# ──────────────────────────────────────────────────────────────────────────────
+# 1) Prerequisites
+# ──────────────────────────────────────────────────────────────────────────────
+command -v python3 >/dev/null 2>&1 || error "Python 3 is required but not found."
+command -v pip3   >/dev/null 2>&1 || error "pip3 is required but not found."
 
-# Create a virtual environment
+# ──────────────────────────────────────────────────────────────────────────────
+# 2) Detect shell RC file (bash or zsh)
+# ──────────────────────────────────────────────────────────────────────────────
+RC=""
+case "${SHELL##*/}" in
+  zsh)   RC="$HOME/.zshrc" ;;
+  bash)  RC="$HOME/.bashrc" ;;
+  *)     # fallback: prefer .bashrc if it exists
+         if [[ -f "$HOME/.bashrc" ]]; then
+           RC="$HOME/.bashrc"
+         elif [[ -f "$HOME/.zshrc" ]]; then
+           RC="$HOME/.zshrc"
+         else
+           error "Could not detect ~/.bashrc or ~/.zshrc."
+         fi
+         ;;
+esac
+info "Using shell RC: $RC"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 3) Create & activate venv
+# ──────────────────────────────────────────────────────────────────────────────
 VENV_DIR="$HOME/.orgi_env"
-python3 -m venv "$VENV_DIR"
+if [[ ! -d "$VENV_DIR" ]]; then
+    info "Creating virtualenv at $VENV_DIR"
+    python3 -m venv "$VENV_DIR"
+else
+    info "Reusing existing virtualenv at $VENV_DIR"
+fi
+# shellcheck source=/dev/null
 source "$VENV_DIR/bin/activate"
 
-# Install the package
-pip install git+https://github.com/Mohamed-Rirash/orgi.git
+# ──────────────────────────────────────────────────────────────────────────────
+# 4) Install (or upgrade) the Orgi package
+# ──────────────────────────────────────────────────────────────────────────────
+info "Installing Orgi CLI from GitHub..."
+pip install --upgrade "git+https://github.com/Mohamed-Rirash/orgi.git"
 
-# Ensure local bin directory exists
-INSTALL_DIR="$HOME/.local/bin"
-mkdir -p "$INSTALL_DIR"
+# ──────────────────────────────────────────────────────────────────────────────
+# 5) Symlink wrapper into ~/.local/bin
+# ──────────────────────────────────────────────────────────────────────────────
+BIN_DIR="$HOME/.local/bin"
+mkdir -p "$BIN_DIR"
 
-# Create a wrapper script
-WRAPPER_SCRIPT="$INSTALL_DIR/orgi"
-cat > "$WRAPPER_SCRIPT" << 'EOF'
-#!/bin/bash
+WRAPPER="$BIN_DIR/orgi"
+cat > "$WRAPPER" <<'EOF'
+#!/usr/bin/env bash
+# OrgI wrapper: always run inside our venv
 source "$HOME/.orgi_env/bin/activate"
-command orgi "$@"
+exec orgi "$@"
 EOF
 
-chmod +x "$WRAPPER_SCRIPT"
+chmod +x "$WRAPPER"
+info "Created launcher script: $WRAPPER"
 
-# Update PATH in shell configuration
-if ! grep -q "$INSTALL_DIR" "$SHELL_RC"; then
-    echo "export PATH=\$PATH:$INSTALL_DIR" >> "$SHELL_RC"
+# ──────────────────────────────────────────────────────────────────────────────
+# 6) Ensure ~/.local/bin is in PATH via shell rc
+# ──────────────────────────────────────────────────────────────────────────────
+EXPORT_CMD='export PATH="$HOME/.local/bin:$PATH"'
+if ! grep -Fxq "$EXPORT_CMD" "$RC"; then
+    echo "" >> "$RC"
+    echo "# Add Orgi CLI to PATH" >> "$RC"
+    echo "$EXPORT_CMD"  >> "$RC"
+    info "Added PATH update to $RC"
+else
+    warn "PATH update already present in $RC"
 fi
 
-# Clean up
-cd ~
-rm -rf "$TEMP_DIR"
+# ──────────────────────────────────────────────────────────────────────────────
+# 7) Done!
+# ──────────────────────────────────────────────────────────────────────────────
+echo
+info "Orgi CLI has been installed successfully!"
+cat <<EOF
 
-echo -e "${GREEN}✅ Orgi CLI has been successfully installed!${NC}"
-echo -e "${YELLOW}To use Orgi, you have two options:${NC}"
-echo -e "1. Restart your terminal"
-echo -e "2. Run: ${GREEN}source $SHELL_RC${NC}"
-echo -e "\n${YELLOW}Try running:${NC}"
-echo -e "  ${GREEN}orgi auto${NC}"
+To start using it, either:
+  • Restart your terminal, or
+  • Run: ${GREEN}source $RC${NC}
+
+Then try:
+  ${GREEN}orgi auto${NC}
+
+EOF

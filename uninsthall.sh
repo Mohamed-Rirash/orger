@@ -1,65 +1,117 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# -----------------------------------------------------------------------------
+# uninstall.sh — Remove the Orgi CLI completely
+# -----------------------------------------------------------------------------
+set -euo pipefail
+IFS=$'\n\t'
 
-set -e
-
-# Colors for output
+# ──────────────────────────────────────────────────────────────────────────────
+# Colors
+# ──────────────────────────────────────────────────────────────────────────────
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 RED='\033[0;31m'
 NC='\033[0m' # No Color
 
-# Detect shell configuration file
-if [ -f "$HOME/.zshrc" ]; then
-    SHELL_RC="$HOME/.zshrc"
-elif [ -f "$HOME/.bashrc" ]; then
-    SHELL_RC="$HOME/.bashrc"
-else
-    echo -e "${RED}Could not detect shell configuration file.${NC}"
+# ──────────────────────────────────────────────────────────────────────────────
+# Helper functions
+# ──────────────────────────────────────────────────────────────────────────────
+error() {
+    echo -e "${RED}✗ $*${NC}" >&2
     exit 1
 }
 
-# Paths to remove
-VENV_DIR="$HOME/.orgi_env"
-INSTALL_DIR="$HOME/.local/bin"
-WRAPPER_SCRIPT="$INSTALL_DIR/orgi"
-
-# Function to remove PATH entry
-remove_path_entry() {
-    local rc_file="$1"
-    # Remove the Orgi PATH entry if it exists
-    sed -i '\|export PATH=\$PATH:'"$INSTALL_DIR"'|d' "$rc_file"
+info() {
+    echo -e "${GREEN}✔ $*${NC}"
 }
 
-# Confirm uninstallation
-echo -e "${YELLOW}This will completely remove Orgi CLI and its associated files.${NC}"
-read -p "Are you sure you want to uninstall Orgi? (y/N) " confirm
+warn() {
+    echo -e "${YELLOW}! $*${NC}"
+}
 
-if [[ "$confirm" =~ ^[Yy]$ ]]; then
-    # Remove virtual environment
-    if [ -d "$VENV_DIR" ]; then
-        echo -e "${YELLOW}Removing Orgi virtual environment...${NC}"
-        rm -rf "$VENV_DIR"
-    fi
-
-    # Remove wrapper script
-    if [ -f "$WRAPPER_SCRIPT" ]; then
-        echo -e "${YELLOW}Removing Orgi wrapper script...${NC}"
-        rm -f "$WRAPPER_SCRIPT"
-    fi
-
-    # Remove PATH entry
-    remove_path_entry "$SHELL_RC"
-
-    # Uninstall pip package
-    if pip list | grep -q orgi; then
-        echo -e "${YELLOW}Uninstalling Orgi pip package...${NC}"
-        pip uninstall -y orgi
-    fi
-
-    echo -e "${GREEN}✅ Orgi CLI has been completely uninstalled.${NC}"
-    echo -e "${YELLOW}To complete the uninstallation, please:${NC}"
-    echo -e "1. Restart your terminal"
-    echo -e "2. Or run: ${GREEN}source $SHELL_RC${NC}"
+# ──────────────────────────────────────────────────────────────────────────────
+# 1) Detect shell RC file
+# ──────────────────────────────────────────────────────────────────────────────
+if [[ -f "$HOME/.zshrc" ]]; then
+    RC_FILE="$HOME/.zshrc"
+elif [[ -f "$HOME/.bashrc" ]]; then
+    RC_FILE="$HOME/.bashrc"
 else
-    echo -e "${RED}Uninstallation cancelled.${NC}"
+    error "Could not detect ~/.bashrc or ~/.zshrc."
 fi
+info "Using shell RC: $RC_FILE"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 2) Paths to remove
+# ──────────────────────────────────────────────────────────────────────────────
+VENV_DIR="$HOME/.orgi_env"
+BIN_DIR="$HOME/.local/bin"
+WRAPPER="$BIN_DIR/orgi"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 3) Confirm
+# ──────────────────────────────────────────────────────────────────────────────
+echo -e "${YELLOW}This will completely remove the Orgi CLI and all its files.${NC}"
+read -r -p "Are you sure you want to uninstall Orgi? [y/N] " CONFIRM
+if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
+    error "Uninstallation cancelled."
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 4) Remove virtualenv
+# ──────────────────────────────────────────────────────────────────────────────
+if [[ -d "$VENV_DIR" ]]; then
+    warn "Removing virtual environment at $VENV_DIR…"
+    rm -rf "$VENV_DIR"
+    info "Virtual environment removed."
+else
+    warn "No virtual environment found at $VENV_DIR."
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 5) Remove launcher script
+# ──────────────────────────────────────────────────────────────────────────────
+if [[ -f "$WRAPPER" ]]; then
+    warn "Removing Orgi launcher script at $WRAPPER…"
+    rm -f "$WRAPPER"
+    info "Launcher script removed."
+else
+    warn "No launcher script found at $WRAPPER."
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 6) Remove PATH entry from shell RC
+# ──────────────────────────────────────────────────────────────────────────────
+# Matches lines exporting ~/.local/bin in any position
+if grep -Fq 'export PATH="$HOME/.local/bin:$PATH"' "$RC_FILE"; then
+    warn "Removing PATH update from $RC_FILE…"
+    # Delete the exact export line plus any preceding comment
+    sed -i.bak '/# Add Orgi CLI to PATH/ {N;d;}' "$RC_FILE"
+    info "PATH update removed (backup at ${RC_FILE}.bak)."
+else
+    warn "No PATH update found in $RC_FILE."
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 7) Uninstall pip package
+# ──────────────────────────────────────────────────────────────────────────────
+if command -v pip3 >/dev/null 2>&1 && pip3 list --disable-pip-version-check | grep -Fq orgi; then
+    warn "Uninstalling Orgi pip package…"
+    pip3 uninstall -y orgi
+    info "Pip package uninstalled."
+else
+    warn "Orgi pip package not found (or pip3 missing)."
+fi
+
+# ──────────────────────────────────────────────────────────────────────────────
+# 8) Final message
+# ──────────────────────────────────────────────────────────────────────────────
+echo
+info "Orgi CLI has been fully uninstalled."
+cat <<EOF
+
+To finalize:
+  • Restart your terminal, or
+  • Run: ${GREEN}source $RC_FILE${NC}
+
+EOF

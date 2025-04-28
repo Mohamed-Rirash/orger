@@ -1,87 +1,65 @@
-# Orgi – File Organizer CLI
+# Orgi CLI
 
-A sleek and intuitive command‑line utility to automatically sort and organize files in your Downloads (or any specified) folder into date‑based directories and type‑based categories. Keep your workspace tidy with minimal effort.
+
+
+A powerful and intuitive command‑line utility for automatically sorting and organizing files in your Downloads (or any specified) directory into date‑based folders and type‑based categories.
+
+<p align="center">
+  <img src="./logo.png" alt="Orgi Logo" width="300"/>
+</p>
+
+---
+
+## Table of Contents
+
+1. [Features](#features)
+2. [Installation](#installation)
+3. [Usage](#usage)
+4. [Configuration](#configuration)
+5. [Examples](#examples)
+6. [Uninstallation](#uninstallation)
+7. [Contributing](#contributing)
+8. [License](#license)
+9. [Support](#support)
+
+---
+
+## Features
+
+- **Custom Source Directory:** Defaults to `~/Downloads`; override via `--src <path>`.
+- **Date‑Based Organization:** Creates subdirectories named `YYYY-MM-DD`.
+- **Type‑Based Categories:** Automatically sorts into:
+  - `images/` (e.g. `.png`, `.jpg`, `.gif`)
+  - `videos/` (e.g. `.mp4`, `.mkv`)
+  - `documents/` (e.g. `.pdf`, `.docx`, `.txt`)
+  - `music/` (e.g. `.mp3`, `.wav`)
+  - `others/` for uncategorized files.
+- **Cross‑Platform:** Compatible with Linux and macOS (Windows support forthcoming).
+- **Lightweight:** Minimal dependencies; easy to install and run.
+
+---
+
+## Installation
+
+### Via Curl Installer (Recommended)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Mohamed-Rirash/orgi/main/install.sh | bash
+```
+
 ![demo](./demo.png)
-[![PyPI Version](https://img.shields.io/pypi/v/orgi.svg)](https://pypi.org/project/orgi/) [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://chatgpt.com/c/LICENSE) [![Build Status](https://github.com/Mohamed-Rirash/orgi/actions/workflows/ci.yml/badge.svg)](https://github.com/Mohamed-Rirash/orgi/actions)
 
----
-
-## 📋 Table of Contents
-
-1. [Features](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#-features)
-    
-2. [Quick Start](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#-quick-start)
-    
-    - [Curl Installer](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#curl-installer)
-        
-    - [Pip Install](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#pip-install)
-        
-3. [Usage](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#-usage)
-    
-4. [Configuration](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#-configuration)
-    
-5. [Examples](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#-examples)
-    
-6. [Contributing](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#-contributing)
-    
-7. [License](https://chatgpt.com/c/680e5669-578c-800e-ae77-616066080827#-license)
-    
-
----
-
-## ✨ Features
-
-- **Source Directory**: Defaults to `~/Downloads`, override with `--src <path>`
-    
-- **Date‑Based Folders**: Automatically creates a folder named after today’s date (`YYYY-MM-DD`)
-    
-- **Type Classification**: Files sorted into subfolders:
-    
-    - `images/` (e.g., `.png`, `.jpg`, `.gif`)
-        
-    - `videos/` (e.g., `.mp4`, `.mkv`)
-        
-    - `documents/` (e.g., `.pdf`, `.docx`, `.txt`)
-        
-    - `music/` (e.g., `.mp3`, `.wav`)
-        
-    - `others/` (any uncategorized types)
-        
-- **Cross‑Platform**: Works on Linux, macOS (Windows support coming)
-    
-- **Lightweight**: No heavy dependencies, easy to install and run
-    
-
----
-
-## ⚡ Quick Start
-
-### Curl Installer
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Mohamed-Rirash/orgi/main/install.sh | bash
-```
-
-This will download the script, install dependencies, and set up the `orgi` command.
-
-### Pip Install
-
-```bash
-pip install orgi
-```
-
-Alternatively, clone the repo and install manually:
+### From Source
 
 ```bash
 git clone https://github.com/Mohamed-Rirash/orgi.git
 cd orgi
-python3 -m pip install -r requirements.txt
 python3 -m pip install .
 ```
 
 ---
 
-## 🚀 Usage
+## Usage
 
 Run the organizer on your default Downloads folder:
 
@@ -92,36 +70,34 @@ orgi auto
 Specify a custom source directory:
 
 ```bash
-orgi auto --src /path/to/your/folder
+orgi auto --src /path/to/folder
 ```
 
-Use `--help` to see all available options:
+View all available commands and options:
 
 ```bash
 orgi --help
 ```
 
-![Screenshot of Orgi in action](https://chatgpt.com/c/docs/screenshot.png)
-
 ---
 
-## ⚙️ Configuration
+## Configuration
 
-Orgi supports optional configuration via `~/.orgirc`:
+Create an optional config file at `~/.orgirc`:
 
 ```ini
 [src]
 path = /Users/you/Downloads
 
 [categories]
-images = .png,.jpg,.jpeg,.gif
-videos = .mp4,.avi,.mkv
+images    = .png,.jpg,.jpeg,.gif
+videos    = .mp4,.avi,.mkv
 documents = .pdf,.docx,.txt
-music = .mp3,.wav
-others =
+music     = .mp3,.wav
+others    =
 ```
 
-Load custom settings with:
+Load a custom config:
 
 ```bash
 orgi auto --config /path/to/.orgirc
@@ -129,39 +105,49 @@ orgi auto --config /path/to/.orgirc
 
 ---
 
-## Uninstallation
+## Examples
 
-To completely remove Orgi:
-
-```bash
-curl -sSL https://raw.githubusercontent.com/Mohamed-Rirash/orgi/main/uninstall.sh | bash
-```
-
-## 🎬 Examples
-
-Organize today’s downloads in a demo folder:
+Organize a demo directory:
 
 ```bash
 orgi auto --src ./demo_downloads
 ```
 
-![Animated demo of file organization](https://chatgpt.com/c/docs/demo.gif)
+---
+
+## Uninstallation
+
+To remove Orgi completely:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/Mohamed-Rirash/orgi/main/uninstall.sh | bash
+```
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
-Contributions are welcome! Feel free to:
+Contributions are welcome! Please:
 
-- Open issues for suggestions or bugs
-    
-- Submit pull requests with improvements
-    
-
-Please follow the [Code of Conduct](https://chatgpt.com/c/CODE_OF_CONDUCT.md) and check our [Contributing Guidelines](https://chatgpt.com/c/CONTRIBUTING.md).
+- Open issues for bugs or feature requests.
+- Fork the repository and submit pull requests.
+- Follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+- Review our [Contribution Guidelines](CONTRIBUTING.md).
 
 ---
 
-## 📄 License
+## License
 
-Distributed under the MIT License. See [LICENSE](https://chatgpt.com/c/LICENSE) for details.
+Distributed under the MIT License. See [LICENSE](LICENSE) for details.
+
+---
+
+## Support
+
+If you find Orgi helpful, please:
+
+- 🌟 Star the repository.
+- 🔄 Share with friends and colleagues.
+- ❤️ Contribute to the project.
+
+Happy organizing! 📁✨

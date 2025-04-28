@@ -73,7 +73,7 @@ Specify a custom source directory:
 orgi auto --src /path/to/folder
 ```
 
-![demo](./demo.png)
+![demo](./demo1.png)
 View all available commands and options:
 
 ```bash

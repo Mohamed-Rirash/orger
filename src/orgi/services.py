@@ -76,11 +76,20 @@ MUSIC_EXTS = {
     ".aiff",
 }
 
+CATEGORY_EXTS = {
+    "images": IMAGE_EXTS,
+    "videos": VIDEO_EXTS,
+    "documents": DOCUMENT_EXTS,
+    "music": MUSIC_EXTS,
+}
+CATEGORY_ORDER = ["images", "videos", "documents", "music", "others"]
 
-console = Console()
-
-# (your IMAGE_EXTS, VIDEO_EXTS, DOCUMENT_EXTS, MUSIC_EXTS as before…)
-
+def determine_category(ext: str) -> str:
+    """Return file category for given extension."""
+    for category, ext_set in CATEGORY_EXTS.items():
+        if ext in ext_set:
+            return category
+    return "others"
 
 def scanner(src: Union[Path, List[Path]]) -> List[Path]:
     """
@@ -112,16 +121,8 @@ def scanner(src: Union[Path, List[Path]]) -> List[Path]:
         ext = "".join(file.suffixes).lower()
         created = datetime.datetime.fromtimestamp(file.stat().st_ctime)
 
-        if ext in IMAGE_EXTS:
-            col = 0
-        elif ext in VIDEO_EXTS:
-            col = 1
-        elif ext in DOCUMENT_EXTS:
-            col = 2
-        elif ext in MUSIC_EXTS:
-            col = 3
-        else:
-            col = 4
+        category = determine_category(ext)
+        col = CATEGORY_ORDER.index(category)
 
         row = ["", "", "", "", ""]
         row[col] = f"{file.name} ({created:%Y-%m-%d %H:%M:%S})"
@@ -253,16 +254,8 @@ def display_files_by_type(files: List[Path]) -> None:
         ext = "".join(file.suffixes).lower()
         created = datetime.datetime.fromtimestamp(file.stat().st_ctime)
 
-        if ext in IMAGE_EXTS:
-            col = 0
-        elif ext in VIDEO_EXTS:
-            col = 1
-        elif ext in DOCUMENT_EXTS:
-            col = 2
-        elif ext in MUSIC_EXTS:
-            col = 3
-        else:
-            col = 4
+        category = determine_category(ext)
+        col = CATEGORY_ORDER.index(category)
 
         row = ["", "", "", "", ""]
         row[col] = f"{file.name} ({created:%Y-%m-%d %H:%M:%S})"
@@ -306,19 +299,12 @@ def organize_files_by_date(files: List[Path], date_dir: Path) -> None:
         ext = "".join(file.suffixes).lower()
         
         # Determine the appropriate category
-        if ext in IMAGE_EXTS:
-            dest_dir = category_dirs["images"]
-        elif ext in VIDEO_EXTS:
-            dest_dir = category_dirs["videos"]
-        elif ext in DOCUMENT_EXTS:
-            dest_dir = category_dirs["documents"]
-        elif ext in MUSIC_EXTS:
-            dest_dir = category_dirs["music"]
-        else:
-            # Skip files with unrecognized extensions
+        category = determine_category(ext)
+        if category == "others":
             skipped_count += 1
             continue
-        
+        dest_dir = category_dirs[category]
+
         dest_path = dest_dir / file.name
         
         # Handle filename conflicts

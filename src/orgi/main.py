@@ -3,9 +3,16 @@ from pathlib import Path
 
 import typer
 
-from .services import (DOCUMENT_EXTS, IMAGE_EXTS, MUSIC_EXTS, VIDEO_EXTS,
-                       display_files_by_type, is_date_like_dir,
-                       organize_files_by_date, scan_files_for_organization)
+from .services import (
+    DOCUMENT_EXTS,
+    IMAGE_EXTS,
+    MUSIC_EXTS,
+    VIDEO_EXTS,
+    display_files_by_type,
+    is_date_like_dir,
+    organize_files_by_date,
+    scan_files_for_organization,
+)
 
 app = typer.Typer()
 DEFAULT_DOWNLOADS = Path.home() / "Downloads"
@@ -55,10 +62,10 @@ def sort_home(
 
         # Create category directories in home
         category_dirs = {
-            "images": home / "images",
-            "videos": home / "videos",
-            "documents": home / "documents",
-            "music": home / "music",
+            "images": home / "Pictures",
+            "videos": home / "Videos",
+            "documents": home / "Documents",
+            "music": home / "Music",
         }
 
         # Make sure category directories exist

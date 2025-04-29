@@ -29,8 +29,22 @@ warn() {
     echo -e "${YELLOW}! $*${NC}"
 }
 
+remove_if_exists() {
+    local path="$1"
+    local type="$2"
+    if [[ -e "$path" ]]; then
+        warn "Removing $type at $path..."
+        rm -rf "$path"
+        info "$type removed."
+        return 0
+    else
+        warn "No $type found at $path."
+        return 1
+    fi
+}
+
 # ──────────────────────────────────────────────────────────────────────────────
-# 1) Detect shell RC file
+# 1) Detect shell RC file and backup
 # ──────────────────────────────────────────────────────────────────────────────
 if [[ -f "$HOME/.zshrc" ]]; then
     RC_FILE="$HOME/.zshrc"
@@ -41,76 +55,70 @@ else
 fi
 info "Using shell RC: $RC_FILE"
 
-# ──────────────────────────────────────────────────────────────────────────────
-# 2) Paths to remove
-# ──────────────────────────────────────────────────────────────────────────────
-VENV_DIR="$HOME/.orger_env"
-BIN_DIR="$HOME/.local/bin"
-WRAPPER="$BIN_DIR/orger"
+# Create backup of RC file
+cp "$RC_FILE" "${RC_FILE}.backup.$(date +%Y%m%d_%H%M%S)"
+info "Created backup of $RC_FILE"
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 3) Confirm
+# 2) Confirm uninstallation
 # ──────────────────────────────────────────────────────────────────────────────
-echo -e "${YELLOW}This will completely remove the Orger CLI and all its files.${NC}"
+echo -e "${YELLOW}This will completely remove the Orger CLI and all its files:${NC}"
+echo -e "  • Virtual environment (~/.orger_env)"
+echo -e "  • Launcher script (~/.local/bin/orger)"
+echo -e "  • PATH modifications in $RC_FILE"
+echo -e "  • Pip package (orger)"
+echo
 read -r -p "Are you sure you want to uninstall Orger? [y/N] " CONFIRM
 if [[ ! "$CONFIRM" =~ ^[Yy]$ ]]; then
     error "Uninstallation cancelled."
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 4) Remove virtualenv
+# 3) Remove components
 # ──────────────────────────────────────────────────────────────────────────────
-if [[ -d "$VENV_DIR" ]]; then
-    warn "Removing virtual environment at $VENV_DIR…"
-    rm -rf "$VENV_DIR"
-    info "Virtual environment removed."
+
+# Remove virtual environment
+remove_if_exists "$HOME/.orger_env" "virtual environment"
+
+# Remove launcher script
+remove_if_exists "$HOME/.local/bin/orger" "launcher script"
+
+# Clean up PATH entry from shell RC
+if grep -q 'export.*PATH.*\.local/bin' "$RC_FILE"; then
+    warn "Cleaning up PATH in $RC_FILE..."
+    # Create a temporary file
+    TEMP_RC=$(mktemp)
+    # Remove the PATH line and any related comments, preserve other contents
+    grep -v -E '(export.*PATH.*\.local/bin|# Add .* CLI to PATH)' "$RC_FILE" > "$TEMP_RC"
+    # Replace original with cleaned version
+    mv "$TEMP_RC" "$RC_FILE"
+    info "PATH cleaned up in $RC_FILE"
 else
-    warn "No virtual environment found at $VENV_DIR."
+    warn "No PATH modification found in $RC_FILE"
+fi
+
+# Uninstall pip package
+if command -v pip3 >/dev/null 2>&1; then
+    if pip3 list --disable-pip-version-check | grep -q "^orger "; then
+        warn "Uninstalling Orger pip package..."
+        pip3 uninstall -y orger
+        info "Pip package uninstalled."
+    else
+        warn "Orger pip package not found."
+    fi
+else
+    warn "pip3 not found, skipping package uninstallation."
 fi
 
 # ──────────────────────────────────────────────────────────────────────────────
-# 5) Remove launcher script
-# ──────────────────────────────────────────────────────────────────────────────
-if [[ -f "$WRAPPER" ]]; then
-    warn "Removing Orger launcher script at $WRAPPER…"
-    rm -f "$WRAPPER"
-    info "Launcher script removed."
-else
-    warn "No launcher script found at $WRAPPER."
-fi
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 6) Remove PATH entry from shell RC
-# ──────────────────────────────────────────────────────────────────────────────
-# Matches lines exporting ~/.local/bin in any position
-if grep -Fq 'export PATH="$HOME/.local/bin:$PATH"' "$RC_FILE"; then
-    warn "Removing PATH update from $RC_FILE…"
-    # Delete the exact export line plus any preceding comment
-    sed -i.bak '/# Add Orger CLI to PATH/ {N;d;}' "$RC_FILE"
-    info "PATH update removed (backup at ${RC_FILE}.bak)."
-else
-    warn "No PATH update found in $RC_FILE."
-fi
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 7) Uninstall pip package
-# ──────────────────────────────────────────────────────────────────────────────
-if command -v pip3 >/dev/null 2>&1 && pip3 list --disable-pip-version-check | grep -Fq orger; then
-    warn "Uninstalling Orger pip package…"
-    pip3 uninstall -y orger
-    info "Pip package uninstalled."
-else
-    warn "Orger pip package not found (or pip3 missing)."
-fi
-
-# ──────────────────────────────────────────────────────────────────────────────
-# 8) Final message
+# 4) Final message
 # ──────────────────────────────────────────────────────────────────────────────
 echo
 info "Orger CLI has been fully uninstalled."
+info "A backup of your shell configuration was created at: ${RC_FILE}.backup.*"
 cat <<EOF
 
-To finalize:
+To finalize the uninstallation:
   • Restart your terminal, or
   • Run: ${GREEN}source $RC_FILE${NC}
 

@@ -44,7 +44,7 @@ A powerful and intuitive command‑line utility for automatically sorting and or
 ### Via Curl Installer (Recommended)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Mohamed-Rirash/orgi/main/install.sh | bash
+curl -fsSL https://github.com/Mohamed-Rirash/orgi/releases/latest/download/install.sh | bash
 ```
 
 ![demo](./demo.png)

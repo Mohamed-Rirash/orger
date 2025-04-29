@@ -328,3 +328,5 @@ def organize_files_by_date(files: List[Path], date_dir: Path) -> None:
     console.print(f"[green]Organized {moved_count} files into {date_dir}[/green]")
     if skipped_count > 0:
         console.print(f"[yellow]Skipped {skipped_count} files (unrecognized types or errors)[/yellow]")
+
+

@@ -69,8 +69,8 @@ source "$VENV_DIR/bin/activate"
 # ──────────────────────────────────────────────────────────────────────────────
 # 4) Install (or upgrade) the Orgi package pinned to v0.1.1
 # ──────────────────────────────────────────────────────────────────────────────
-info "Installing Orgi CLI (v0.1.1) from GitHub..."
-pip install --upgrade "git+https://github.com/Mohamed-Rirash/orgi.git@v0.1.1"
+info "Installing Orgi CLI (v0.1.2) from GitHub..."
+pip install --upgrade "git+https://github.com/Mohamed-Rirash/orgi.git@v0.1.2"
 
 # ──────────────────────────────────────────────────────────────────────────────
 # 5) Symlink wrapper into ~/.local/bin
@@ -106,7 +106,7 @@ fi
 # 7) Done!
 # ──────────────────────────────────────────────────────────────────────────────
 echo
-info "Orgi CLI v0.1.1 has been installed successfully!"
+info "Orgi CLI v0.1.2 has been installed successfully!"
 cat <<EOF
 
 To start using it, either:
